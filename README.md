@@ -29,25 +29,25 @@ With Vipps Login for CraftCMS you can
 
 #### Find the Settings Page
 You can find the settings by navigating to Settings -> Vipps Login.
-![Plugin Settings: Location](docs/images/settings_location.png)
+![Plugin Settings: Location](https://raw.githubusercontent.com/elleracompany/vipps-craft-login/master/docs/images/settings_location.png)
 
 #### Add your credentials
 Insert your credentials. You can find these in the [Vipps Portal](https://portal.vipps.no) 
-![Plugin Settings: Credentials](docs/images/settings_credentials.png)
+![Plugin Settings: Credentials](https://raw.githubusercontent.com/elleracompany/vipps-craft-login/master/docs/images/settings_credentials.png)
 
 #### Activate Vipps Login and add the redirect URI
 In the [Vipps Portal](https://portal.vipps.no), activate Login with Vipps and add the Redirect URI as you find it under "Redirect URIs" in either "Login with Vipps" and/or "Continue with Vipps". 
 Also adjust the scopes to suit your applications needs.
 
 ###### Setup Login
-![Plugin Settings: Credentials](docs/images/portal_setup_login.png)
+![Plugin Settings: Credentials](https://raw.githubusercontent.com/elleracompany/vipps-craft-login/master/docs/images/portal_setup_login.png)
 
 ###### Add Redirect URIs
-![Plugin Settings: Credentials](docs/images/portal_redirect_uris.png)
+![Plugin Settings: Credentials](https://raw.githubusercontent.com/elleracompany/vipps-craft-login/master/docs/images/portal_redirect_uris.png)
 
 ###### Locate Redirect URIs
-![Plugin Settings: Credentials](docs/images/settings_login.png)
-![Plugin Settings: Credentials](docs/images/settings_continue.png)
+![Plugin Settings: Credentials](https://raw.githubusercontent.com/elleracompany/vipps-craft-login/master/docs/images/settings_login.png)
+![Plugin Settings: Credentials](https://raw.githubusercontent.com/elleracompany/vipps-craft-login/master/docs/images/settings_continue.png)
 
 ## Rendering the button
 To render the login button anywhere you can utilize the `loginButton.render()` function of the component the plugin registers.
@@ -206,6 +206,6 @@ Have a look at the twig template located in `docs/examples/frontend.twig` for so
 
 For Craft-related issues you should use the resources and communities available [here](https://craftcms.com/community). 
 
-For Plugin-related issues you should create a new issue in the [official repository](https://github.com/vippsas/vipps-craft-login/issues).
+For Plugin-related issues you should create a new issue in the [official repository](https://github.com/elleracompany/vipps-craft-login/issues).
 
 For Vipps-related issues you should contact [Vipps Integration](https://github.com/vippsas/vipps-developers/blob/master/contact.md)

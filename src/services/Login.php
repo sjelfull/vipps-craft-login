@@ -6,6 +6,7 @@ namespace vippsas\login\services;
 use Craft;
 use GuzzleHttp\Client;
 use vippsas\login\components\Button;
+use vippsas\login\exceptions\RequestTimeoutException;
 use vippsas\login\models\Session;
 use vippsas\login\VippsLogin;
 use yii\base\Component;
@@ -71,7 +72,7 @@ class Login extends Component
      */
     public function loginButton() : Button
     {
-        return new Button($this->getLoginUrl());
+        return (new Button())->login();
     }
 
     /**
@@ -82,7 +83,7 @@ class Login extends Component
      */
     public function continueButton() : Button
     {
-        return (new Button($this->getContinueUrl()))->continue();
+        return (new Button())->continue();
     }
 
     /**
@@ -93,13 +94,21 @@ class Login extends Component
      */
     public function getLoginUrl() : string
     {
+        $state = \Craft::$app->security->generateRandomString(50);
         $parameters = [
             'client_id' => $this->getClientId(),
             'response_type' => 'code',
             'scope' => implode(' ', $this->settings->getLoginScopes()),
-            'state' => \Craft::$app->security->generateRandomString(30),
+            'state' => $state,
             'redirect_uri' => $this->settings->getRedirectUri(),
         ];
+
+        if($this->settings->loginAutomaticReturn()) {
+            $parameters['requested_flow'] = 'automatic_return_from_vipps_app';
+            $parameters['code_challenge'] = base64_encode($this->generateCodeChallenge($state));
+            $parameters['code_challenge_method'] = 'S256';
+        }
+
         $path = $this->getOpenIDConfiguration('authorization_endpoint', $this->getBaseUrl().'/access-management-1.0/access/oauth2/auth');
 
         return $path.'?'.http_build_query($parameters);
@@ -113,13 +122,21 @@ class Login extends Component
      */
     public function getContinueUrl() : string
     {
+        $state = \Craft::$app->security->generateRandomString(50);
         $parameters = [
             'client_id' => $this->getClientId(),
             'response_type' => 'code',
             'scope' => implode(' ', $this->settings->getContinueScopes()),
-            'state' => \Craft::$app->security->generateRandomString(30),
+            'state' => $state,
             'redirect_uri' => $this->settings->getRedirectUri('continue'),
         ];
+
+        if($this->settings->continueAutomaticReturn()) {
+            $parameters['requested_flow'] = 'automatic_return_from_vipps_app';
+            $parameters['code_challenge'] = base64_encode($this->generateCodeChallenge($state));
+            $parameters['code_challenge_method'] = 'S256';
+        }
+
         $path = $this->getOpenIDConfiguration('authorization_endpoint', $this->getBaseUrl().'/access-management-1.0/access/oauth2/auth');
 
         return $path.'?'.http_build_query($parameters);
@@ -128,14 +145,15 @@ class Login extends Component
     /**
      * Request a new login token from vipps based on a code
      * @param $code
+     * @param $state
      * @return \Psr\Http\Message\ResponseInterface
      * @throws InvalidConfigException
      */
-    public function getNewLoginToken($code)
+    public function getNewLoginToken($code, $state)
     {
         $path = $this->getOpenIDConfiguration('token_endpoint', $this->getBaseUrl().'/access-management-1.0/access/oauth2/token');
 
-        return $this->getClient()->post($path, [
+        $body = [
             'headers' => [
                 'Content-Type' => 'application/x-www-form-urlencoded',
                 'Authorization' => 'Basic '.base64_encode($this->getClientId().':'.$this->getClientSecret())
@@ -146,20 +164,29 @@ class Login extends Component
                 'redirect_uri' => $this->settings->getRedirectUri(),
                 'client_id' => $this->getClientId()
             ]
-        ]);
+        ];
+
+        if($this->settings->loginAutomaticReturn()) {
+            $code_challenge = $this->retrieveCodeChallenge($state);
+            if(!$code_challenge || is_null($code_challenge)) throw new RequestTimeoutException(Craft::t('vipps_login', 'Authorization was not completed within the timeframe. Please try again.'));
+            $body['form_params']['code_verifier'] = $code_challenge;
+        }
+
+        return $this->getClient()->post($path, $body);
     }
 
     /**
      * Request a new continue token from vipps based on a code
      * @param $code
+     * @param $state
      * @return \Psr\Http\Message\ResponseInterface
      * @throws InvalidConfigException
      */
-    public function getNewContinueToken($code)
+    public function getNewContinueToken($code, $state)
     {
         $path = $this->getOpenIDConfiguration('token_endpoint', $this->getBaseUrl().'/access-management-1.0/access/oauth2/token');
 
-        return $this->getClient()->post($path, [
+        $body = [
             'headers' => [
                 'Content-Type' => 'application/x-www-form-urlencoded',
                 'Authorization' => 'Basic '.base64_encode($this->getClientId().':'.$this->getClientSecret())
@@ -170,7 +197,15 @@ class Login extends Component
                 'redirect_uri' => $this->settings->getRedirectUri('continue'),
                 'client_id' => $this->getClientId()
             ]
-        ]);
+        ];
+
+        if($this->settings->continueAutomaticReturn()) {
+            $code_challenge = $this->retrieveCodeChallenge($state);
+            if(!$code_challenge || is_null($code_challenge)) throw new RequestTimeoutException(Craft::t('vipps_login', 'Authorization was not completed within the timeframe. Please try again.'));
+            $body['form_params']['code_verifier'] = $code_challenge;
+        }
+
+        return $this->getClient()->post($path, $body);
     }
 
     /**
@@ -295,5 +330,36 @@ class Login extends Component
     {
         if(!$this->client || $this->client instanceof Client) $this->client = new Client();
         return $this->client;
+    }
+
+    /**
+     * Generate a random code challenge and saves it to cache with a 5 minute duration.
+     * The function returns a sha256 hashed version of the random code.
+     *
+     * @param $state
+     *
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    private function generateCodeChallenge($state)
+    {
+        $code = \Craft::$app->security->generateRandomString(60);
+        Craft::info('Code generated: ' . $code);
+        Craft::$app->cache->set('vipps_' . $state, $code, 300);
+        $hash = hash('sha256', $code);
+        Craft::info('Hash generated: ' . $hash);
+        return $hash;
+    }
+
+    /**
+     * Retrieves a code from cache based on a state.
+     * @param $state
+     * @return mixed
+     */
+    private function retrieveCodeChallenge($state)
+    {
+        $code = Craft::$app->cache->get('vipps_' . $state);
+        Craft::info('Code retrieved: ' . $code);
+        return $code;
     }
 }

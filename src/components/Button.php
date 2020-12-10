@@ -95,9 +95,9 @@ class Button
      * LogInButton constructor.
      * @param string $href
      */
-    public function __construct(string $href)
+    public function __construct()
     {
-        $this->href = $href;
+        $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/login';
     }
 
     /**
@@ -132,6 +132,7 @@ class Button
     public function login()
     {
         $this->type = self::TYPE_LOGIN;
+        $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/login';
         return $this;
     }
 
@@ -142,6 +143,7 @@ class Button
     public function continue()
     {
         $this->type = self::TYPE_CONTINUE;
+        $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/continue';
         return $this;
     }
 

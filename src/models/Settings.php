@@ -241,6 +241,24 @@ class Settings extends Model
     }
 
     /**
+     * Is the login flow using automatic return?
+     * @return bool
+     */
+    public function loginAutomaticReturn() : bool
+    {
+        return $this->login_automatic_return == 1;
+    }
+
+    /**
+     * Is the continue flow using automatic return?
+     * @return bool
+     */
+    public function continueAutomaticReturn() : bool
+    {
+        return $this->continue_automatic_return == 1;
+    }
+
+    /**
      * Returns the scopes
      * @return array
      */

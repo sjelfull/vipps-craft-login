@@ -52,6 +52,13 @@ class Settings extends Model
     public $prod_subscription_key;
 
     /**
+     * Automatic return after login
+     * https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#automatic-return-from-vipps-app
+     * @var boolean
+     */
+    public $login_automatic_return = false;
+
+    /**
      * Request address
      * @var boolean
      */
@@ -86,6 +93,13 @@ class Settings extends Model
      * @var boolean
      */
     public $login_nin = false;
+
+    /**
+     * Automatic return after continue
+     * https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#automatic-return-from-vipps-app
+     * @var boolean
+     */
+    public $continue_automatic_return = false;
 
     /**
      * Request address
@@ -157,7 +171,7 @@ class Settings extends Model
     public function rules()
     {
         return [
-            [['test'], 'boolean', 'trueValue' => true, 'falseValue' => false],
+            [['test', 'login_automatic_return', 'continue_automatic_return'], 'boolean', 'trueValue' => true, 'falseValue' => false],
             [['login_address', 'login_birthDate', 'login_email', 'login_name', 'login_phoneNumber', 'login_nin'], 'boolean', 'trueValue' => true, 'falseValue' => false],
             [['continue_address', 'continue_birthDate', 'continue_email', 'continue_name', 'continue_phoneNumber', 'continue_nin'], 'boolean', 'trueValue' => true, 'falseValue' => false],
             [['test_client_id', 'test_client_secret', 'test_subscription_key', 'prod_client_id', 'prod_client_secret', 'prod_subscription_key', 'verify_template'], 'string'],
@@ -202,7 +216,9 @@ class Settings extends Model
             'continue_name' => 'Request Name',
             'continue_phoneNumber' => 'Request Phone Number',
             'continue_nin' => 'Request NIN',
-            'verify_template' => 'Verification Template'
+            'verify_template' => 'Verification Template',
+            'login_automatic_return' => 'Automatic return from Vipps app',
+            'continue_automatic_return' => 'Automatic return from Vipps app'
         ];
     }
 

@@ -57,7 +57,13 @@ class SettingsController extends Controller
                 'plugin' => $plugin,
             ]);
 
-            return null;
+            $response = new Response();
+            $response->setStatusCode(500);
+            $response->format = Response::FORMAT_JSON;
+            $response->content = [
+                'error' => Craft::t('app', "Couldn't save plugin settings.")
+            ];
+            return $response;
         }
 
         Craft::$app->getSession()->setNotice(Craft::t('app', 'Plugin settings saved.'));

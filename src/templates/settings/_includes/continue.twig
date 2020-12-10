@@ -17,6 +17,15 @@
             </div>
         </div>
 
+        <h2>Flow</h2>
+        {{ forms.lightswitchField({
+            label: settings.getAttributeLabel('continue_automatic_return'),
+            name: 'continue_automatic_return',
+            on: settings.continue_automatic_return,
+            instructions: 'Please see the <a href="https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#automatic-return-from-vipps-app">official documentation</a> before enabling this feature.',
+            errors: settings.getErrors('continue_automatic_return')
+        }) }}
+
         <h2>Scopes</h2>
 
         {{ forms.lightswitchField({

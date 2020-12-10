@@ -12,6 +12,7 @@ use vippsas\login\VippsLogin;
 use yii\base\Component;
 use vippsas\login\models\Settings;
 use yii\base\InvalidConfigException;
+use yii\helpers\StringHelper;
 
 class Login extends Component
 {
@@ -105,7 +106,7 @@ class Login extends Component
 
         if($this->settings->loginAutomaticReturn()) {
             $parameters['requested_flow'] = 'automatic_return_from_vipps_app';
-            $parameters['code_challenge'] = base64_encode($this->generateCodeChallenge($state));
+            $parameters['code_challenge'] = $this->generateCodeChallenge($state);
             $parameters['code_challenge_method'] = 'S256';
         }
 
@@ -133,7 +134,7 @@ class Login extends Component
 
         if($this->settings->continueAutomaticReturn()) {
             $parameters['requested_flow'] = 'automatic_return_from_vipps_app';
-            $parameters['code_challenge'] = base64_encode($this->generateCodeChallenge($state));
+            $parameters['code_challenge'] = $this->generateCodeChallenge($state);
             $parameters['code_challenge_method'] = 'S256';
         }
 
@@ -167,9 +168,9 @@ class Login extends Component
         ];
 
         if($this->settings->loginAutomaticReturn()) {
-            $code_challenge = $this->retrieveCodeChallenge($state);
-            if(!$code_challenge || is_null($code_challenge)) throw new RequestTimeoutException(Craft::t('vipps_login', 'Authorization was not completed within the timeframe. Please try again.'));
-            $body['form_params']['code_verifier'] = $code_challenge;
+            $code_verifier = $this->retrieveCodeVerifier($state);
+            if(!$code_verifier || is_null($code_verifier)) throw new RequestTimeoutException(Craft::t('vipps_login', 'Authorization was not completed within the timeframe. Please try again.'));
+            $body['form_params']['code_verifier'] = $code_verifier;
         }
 
         return $this->getClient()->post($path, $body);
@@ -200,7 +201,7 @@ class Login extends Component
         ];
 
         if($this->settings->continueAutomaticReturn()) {
-            $code_challenge = $this->retrieveCodeChallenge($state);
+            $code_challenge = $this->retrieveCodeVerifier($state);
             if(!$code_challenge || is_null($code_challenge)) throw new RequestTimeoutException(Craft::t('vipps_login', 'Authorization was not completed within the timeframe. Please try again.'));
             $body['form_params']['code_verifier'] = $code_challenge;
         }
@@ -336,6 +337,8 @@ class Login extends Component
      * Generate a random code challenge and saves it to cache with a 5 minute duration.
      * The function returns a sha256 hashed version of the random code.
      *
+     * https://tools.ietf.org/html/rfc7636#section-4.1
+     *
      * @param $state
      *
      * @return string
@@ -343,12 +346,10 @@ class Login extends Component
      */
     private function generateCodeChallenge($state)
     {
-        $code = \Craft::$app->security->generateRandomString(60);
-        Craft::info('Code generated: ' . $code);
-        Craft::$app->cache->set('vipps_' . $state, $code, 300);
-        $hash = hash('sha256', $code);
-        Craft::info('Hash generated: ' . $hash);
-        return $hash;
+        $code_verifier = \Craft::$app->security->generateRandomString(128);
+        Craft::$app->cache->set('vipps_' . $state, $code_verifier, 300);
+        // BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+        return StringHelper::base64UrlEncode(hash('sha256', $code_verifier));
     }
 
     /**
@@ -356,10 +357,8 @@ class Login extends Component
      * @param $state
      * @return mixed
      */
-    private function retrieveCodeChallenge($state)
+    private function retrieveCodeVerifier($state)
     {
-        $code = Craft::$app->cache->get('vipps_' . $state);
-        Craft::info('Code retrieved: ' . $code);
-        return $code;
+        return Craft::$app->cache->get('vipps_' . $state);
     }
 }

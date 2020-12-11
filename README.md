@@ -94,6 +94,9 @@ Append to both:
 {{ craft.vippsLogin.loginButton.render('rel="external"', 'title="Login with Vipps" class="btn"') | raw }}
 ```
 
+#### ReturnURL
+You can add a return url using the `returnUrl()` function, or you can manually add `?r=BASE64URL(yoururl)` to the end of the button link should you need to dynamically update with javascript.
+
 ## Rendering your own button
 You can also call the function `craft.vippsLogin.getLoginUrl()` or `craft.vippsLogin.getContinueUrl()` to just get the URL.
 ```

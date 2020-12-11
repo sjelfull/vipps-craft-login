@@ -172,9 +172,10 @@ class VippsController extends Controller
      */
     public function actionLogout()
     {
-        $this->setReturnUrl();
         Craft::$app->session->remove('vipps_login');
         Craft::$app->user->logout();
+        $returnUrl = $this->getReturnUrl();
+        if($returnUrl) return $this->redirect($returnUrl);
         return $this->goBack();
     }
 
@@ -363,13 +364,14 @@ class VippsController extends Controller
         return $user;
     }
 
-    private function setReturnUrl()
+    private function getReturnUrl()
     {
         $r = \Craft::$app->request->get('r');
         if(is_string($r) && strlen($r) > 0)
         {
             $url = StringHelper::base64UrlDecode($r);
-            if($url) \Craft::$app->user->setReturnUrl($url);
+            return $url;
         }
+        return false;
     }
 }

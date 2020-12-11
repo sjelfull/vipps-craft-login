@@ -349,7 +349,7 @@ class Login extends Component
         $code_verifier = \Craft::$app->security->generateRandomString(128);
         Craft::$app->cache->set('vipps_' . $state, $code_verifier, 300);
         // BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
-        return StringHelper::base64UrlEncode(hash('sha256', $code_verifier));
+        return rtrim(StringHelper::base64UrlEncode(hash('sha256', utf8_encode($code_verifier), true)),'=');
     }
 
     /**

@@ -143,6 +143,13 @@ class Login extends Component
         return $path.'?'.http_build_query($parameters);
     }
 
+    public function getLogoutUrl($returnUrl = false): string
+    {
+        $url = Craft::$app->request->getHostInfo().'/vipps/logout';
+        if($returnUrl) $url .= '?r=' . StringHelper::base64UrlEncode($returnUrl);
+        return $url;
+    }
+
     /**
      * Request a new login token from vipps based on a code
      * @param $code

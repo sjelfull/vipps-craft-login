@@ -19,6 +19,7 @@ use vippsas\login\models\Session;
 use vippsas\login\records\User as VippsUser;
 use yii\web\Response;
 use vippsas\login\VippsLogin;
+use craft\helpers\StringHelper;
 //use craft\commerce\records\Country;
 
 class VippsController extends Controller
@@ -161,6 +162,19 @@ class VippsController extends Controller
     public function actionForget()
     {
         Craft::$app->session->remove('vipps_login');
+        return $this->goBack();
+    }
+
+    /**
+     * Logs out the user and forgets the users Vipps-session
+     *
+     * @return Response
+     */
+    public function actionLogout()
+    {
+        $this->setReturnUrl();
+        Craft::$app->session->remove('vipps_login');
+        Craft::$app->user->logout();
         return $this->goBack();
     }
 
@@ -347,5 +361,15 @@ class VippsController extends Controller
         Craft::$app->getElements()->saveElement($user, false);
 
         return $user;
+    }
+
+    private function setReturnUrl()
+    {
+        $r = \Craft::$app->request->get('r');
+        if(is_string($r) && strlen($r) > 0)
+        {
+            $url = StringHelper::base64UrlDecode($r);
+            if($url) \Craft::$app->user->setReturnUrl($url);
+        }
     }
 }

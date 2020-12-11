@@ -98,10 +98,12 @@ Append to both:
 You can add a return url using the `returnUrl()` function, or you can manually add `?r=BASE64URL(yoururl)` to the end of the button link should you need to dynamically update with javascript.
 
 ## Rendering your own button
-You can also call the function `craft.vippsLogin.getLoginUrl()` or `craft.vippsLogin.getContinueUrl()` to just get the URL.
+You can also call the function `craft.vippsLogin.getLoginUrl()`, `craft.vippsLogin.getContinueUrl()` or `craft.vippsLogin.getLogoutUrl()` to just get the URL.
 ```
 <a href="{{ craft.vippsLogin.getLoginUrl() }}">Log in with Vipps</a>
 <a href="{{ craft.vippsLogin.getContinueUrl() }}">Continue with Vipps</a>
+<a href="{{ craft.vippsLogin.getLogoutUrl() }}">Log out</a>
+<a href="{{ craft.vippsLogin.getLogoutUrl(string optional_return_url) }}">Log out</a>
 ```
 
 ## Getting user information from Vipps

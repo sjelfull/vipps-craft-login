@@ -70,8 +70,9 @@ The button can be modified by adding functions between `loginButton` and `render
 | `small` | Small size, 210px | `craft.vippsLogin.loginButton.small.render()` |
 | `large` | Large Size, 250px (Default) | `craft.vippsLogin.loginButton.large.render()` |
 | `continue` | Change the login button to Continue | `craft.vippsLogin.loginButton.continue.render()`|
-| `login` | Change the continue button to Login | `craft.vippsLogin.continueButton.login.render()` |
-| `register` | Change the button to Register | `craft.vippsLogin.continueButton.register.render()` |
+| `login` | Change the continue button to Login | `craft.vippsLogin.continueButton.login.render()` |`
+| `register` | Change the button to Register | `craft.vippsLogin.continueButton.register.render()` |`
+| `returnUrl` | Manage the redirect URL | `craft.vippsLogin.returnUrl('https://vipps.no?query=s#div').render()` |`
 
 These functions can be combined;
 ```

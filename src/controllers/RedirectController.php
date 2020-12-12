@@ -20,14 +20,14 @@ class RedirectController extends Controller
 
     public function actionLogin()
     {
-        $this->setReturnUrl();
-        return $this->redirect(VippsLogin::getInstance()->vippsLogin->getLoginUrl());
+        $returnUrl = $this->setReturnUrl();
+        return $this->redirect(VippsLogin::getInstance()->vippsLogin->getLoginUrl($returnUrl));
     }
 
     public function actionContinue()
     {
-        $this->setReturnUrl();
-        return $this->redirect(VippsLogin::getInstance()->vippsLogin->getContinueUrl());
+        $returnUrl = $this->setReturnUrl();
+        return $this->redirect(VippsLogin::getInstance()->vippsLogin->getContinueUrl($returnUrl));
     }
 
     private function setReturnUrl()
@@ -36,7 +36,11 @@ class RedirectController extends Controller
         if(is_string($r) && strlen($r) > 0)
         {
             $url = StringHelper::base64UrlDecode($r);
-            if($url) \Craft::$app->user->setReturnUrl($url);
+            if($url) {
+                \Craft::$app->user->setReturnUrl($url);
+                return $url;
+            }
         }
+        return null;
     }
 }

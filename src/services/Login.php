@@ -89,24 +89,29 @@ class Login extends Component
 
     /**
      * Returns the auth URL
+     * @param string
      * @return string
      * @throws InvalidConfigException
      * @throws \yii\base\Exception
      */
-    public function getLoginUrl() : string
+    public function getLoginUrl($returnUrl) : string
     {
-        $state = \Craft::$app->security->generateRandomString(50);
+        $state_key = \Craft::$app->security->generateRandomString(50);
+        $state = new \stdClass();
+        $state->key = $state_key;
+        $state->returnUrl = $returnUrl;
+
         $parameters = [
             'client_id' => $this->getClientId(),
             'response_type' => 'code',
             'scope' => implode(' ', $this->settings->getLoginScopes()),
-            'state' => $state,
+            'state' => base64_encode(serialize($state)),
             'redirect_uri' => $this->settings->getRedirectUri(),
         ];
 
         if($this->settings->loginAutomaticReturn()) {
             $parameters['requested_flow'] = 'automatic_return_from_vipps_app';
-            $parameters['code_challenge'] = $this->generateCodeChallenge($state);
+            $parameters['code_challenge'] = $this->generateCodeChallenge($state_key);
             $parameters['code_challenge_method'] = 'S256';
         }
 
@@ -117,24 +122,29 @@ class Login extends Component
 
     /**
      * Returns the auth URL
+     * @param string
      * @return string
      * @throws InvalidConfigException
      * @throws \yii\base\Exception
      */
-    public function getContinueUrl() : string
+    public function getContinueUrl($returnUrl) : string
     {
-        $state = \Craft::$app->security->generateRandomString(50);
+        $state_key = \Craft::$app->security->generateRandomString(50);
+        $state = new \stdClass();
+        $state->key = $state_key;
+        $state->returnUrl = $returnUrl;
+
         $parameters = [
             'client_id' => $this->getClientId(),
             'response_type' => 'code',
             'scope' => implode(' ', $this->settings->getContinueScopes()),
-            'state' => $state,
+            'state' => base64_encode(serialize($state)),
             'redirect_uri' => $this->settings->getRedirectUri('continue'),
         ];
 
         if($this->settings->continueAutomaticReturn()) {
             $parameters['requested_flow'] = 'automatic_return_from_vipps_app';
-            $parameters['code_challenge'] = $this->generateCodeChallenge($state);
+            $parameters['code_challenge'] = $this->generateCodeChallenge($state_key);
             $parameters['code_challenge_method'] = 'S256';
         }
 
@@ -161,6 +171,7 @@ class Login extends Component
     {
         $path = $this->getOpenIDConfiguration('token_endpoint', $this->getBaseUrl().'/access-management-1.0/access/oauth2/token');
 
+
         $body = [
             'headers' => [
                 'Content-Type' => 'application/x-www-form-urlencoded',
@@ -175,7 +186,8 @@ class Login extends Component
         ];
 
         if($this->settings->loginAutomaticReturn()) {
-            $code_verifier = $this->retrieveCodeVerifier($state);
+            $state = unserialize(base64_decode($state));
+            $code_verifier = $this->retrieveCodeVerifier($state->key);
             if(!$code_verifier || is_null($code_verifier)) throw new RequestTimeoutException(Craft::t('vipps_login', 'Authorization was not completed within the timeframe. Please try again.'));
             $body['form_params']['code_verifier'] = $code_verifier;
         }
@@ -208,9 +220,10 @@ class Login extends Component
         ];
 
         if($this->settings->continueAutomaticReturn()) {
-            $code_challenge = $this->retrieveCodeVerifier($state);
-            if(!$code_challenge || is_null($code_challenge)) throw new RequestTimeoutException(Craft::t('vipps_login', 'Authorization was not completed within the timeframe. Please try again.'));
-            $body['form_params']['code_verifier'] = $code_challenge;
+            $state = unserialize(base64_decode($state));
+            $code_verifier = $this->retrieveCodeVerifier($state->key);
+            if(!$code_verifier || is_null($code_verifier)) throw new RequestTimeoutException(Craft::t('vipps_login', 'Authorization was not completed within the timeframe. Please try again.'));
+            $body['form_params']['code_verifier'] = $code_verifier;
         }
 
         return $this->getClient()->post($path, $body);

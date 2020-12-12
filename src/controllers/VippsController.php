@@ -53,7 +53,7 @@ class VippsController extends Controller
             Craft::$app->session->setFlash('warning', Craft::t('vipps-login', 'You\'re already logged in as {name}.', [
                 'name' => Craft::$app->user->identity->friendlyName,
             ]));
-            return $this->goBack();
+            return $this->return($get['state']);
         }
 
         if($session = $this->setSessionFromLoginResponse($get))
@@ -88,7 +88,7 @@ class VippsController extends Controller
             }
         }
 
-        return $this->goBack();
+        return $this->return($get['state']);
     }
 
     /**
@@ -103,7 +103,7 @@ class VippsController extends Controller
 
         $this->setSessionFromContinueResponse($get);
 
-        return $this->goBack();
+        return $this->return($get['state']);
     }
 
     /**
@@ -373,5 +373,12 @@ class VippsController extends Controller
             return $url;
         }
         return false;
+    }
+
+    public function return($state)
+    {
+        $state = unserialize(base64_decode($state));
+        if($state && isset($state->returnUrl)) return $this->redirect($state->returnUrl);
+        return $this->goBack();
     }
 }

@@ -57,7 +57,7 @@ class SettingsController extends Controller
                 'plugin' => $plugin,
             ]);
 
-            return null;
+            return $this->redirectToPostedUrl();
         }
 
         Craft::$app->getSession()->setNotice(Craft::t('app', 'Plugin settings saved.'));

@@ -4,6 +4,7 @@
 namespace vippsas\login\components;
 
 use Craft;
+use craft\helpers\StringHelper;
 
 class Button
 {
@@ -88,6 +89,12 @@ class Button
      */
     private $type = self::TYPE_LOGIN;
 
+    /**
+     * Optional return url
+     * @var string
+     */
+    private $return_url;
+
     // Public Methods
     // =========================================================================
 
@@ -95,9 +102,9 @@ class Button
      * LogInButton constructor.
      * @param string $href
      */
-    public function __construct(string $href)
+    public function __construct()
     {
-        $this->href = $href;
+        $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/login';
     }
 
     /**
@@ -122,7 +129,9 @@ class Button
         else $a = ' ' . $a;
         if ($img == null) $img = '';
         else $img = ' ' . $img;
-        return "<a href=\"{$this->href}\"{$a}><img src=\"/vipps/asset/button/{$filename}\"{$img}></a>";
+        if($this->return_url) $href = $this->href . '?r=' . $this->return_url;
+        else $href = $this->href;
+        return "<a href=\"{$href}\"{$a}><img src=\"/vipps/asset/button/{$filename}\"{$img}></a>";
     }
 
     /**
@@ -132,6 +141,7 @@ class Button
     public function login()
     {
         $this->type = self::TYPE_LOGIN;
+        $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/login';
         return $this;
     }
 
@@ -142,6 +152,7 @@ class Button
     public function continue()
     {
         $this->type = self::TYPE_CONTINUE;
+        $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/continue';
         return $this;
     }
 
@@ -239,6 +250,16 @@ class Button
     public function pill()
     {
         $this->shape = self::SHAPE_PILL;
+        return $this;
+    }
+
+    /**
+     * @param $url
+     * @return $this
+     */
+    public function returnUrl($url)
+    {
+        $this->return_url = StringHelper::base64UrlEncode($url);
         return $this;
     }
 

@@ -7,11 +7,11 @@ use Craft;
 use craft\elements\User;
 use craft\records\User as UserRecord;
 use craft\web\Controller;
+use GuzzleHttp\Exception\ClientException;
 use vippsas\login\events\ConnectEvent;
 use vippsas\login\events\ContinueEvent;
 use vippsas\login\events\LoggedInEvent;
 use vippsas\login\events\RegisterEvent;
-use vippsas\login\exceptions\AlreadyLoggedInException;
 use vippsas\login\exceptions\CreateUserException;
 use vippsas\login\exceptions\VerifiedEmailRequiredException;
 use vippsas\login\models\ConfirmPasswordForm;
@@ -19,6 +19,7 @@ use vippsas\login\models\Session;
 use vippsas\login\records\User as VippsUser;
 use yii\web\Response;
 use vippsas\login\VippsLogin;
+use craft\helpers\StringHelper;
 //use craft\commerce\records\Country;
 
 class VippsController extends Controller
@@ -52,7 +53,7 @@ class VippsController extends Controller
             Craft::$app->session->setFlash('warning', Craft::t('vipps-login', 'You\'re already logged in as {name}.', [
                 'name' => Craft::$app->user->identity->friendlyName,
             ]));
-            return $this->goBack();
+            return $this->return($get['state']);
         }
 
         if($session = $this->setSessionFromLoginResponse($get))
@@ -87,7 +88,7 @@ class VippsController extends Controller
             }
         }
 
-        return $this->goBack();
+        return $this->return($get['state']);
     }
 
     /**
@@ -102,7 +103,7 @@ class VippsController extends Controller
 
         $this->setSessionFromContinueResponse($get);
 
-        return $this->goBack();
+        return $this->return($get['state']);
     }
 
     /**
@@ -165,6 +166,20 @@ class VippsController extends Controller
     }
 
     /**
+     * Logs out the user and forgets the users Vipps-session
+     *
+     * @return Response
+     */
+    public function actionLogout()
+    {
+        Craft::$app->session->remove('vipps_login');
+        Craft::$app->user->logout();
+        $returnUrl = $this->getReturnUrl();
+        if($returnUrl) return $this->redirect($returnUrl);
+        return $this->goBack();
+    }
+
+    /**
      * @param $get
      * @return bool|Session
      */
@@ -179,7 +194,7 @@ class VippsController extends Controller
         {
             try {
                 /* @var $response \Psr\Http\Message\ResponseInterface */
-                $response = VippsLogin::getInstance()->vippsLogin->getNewContinueToken($get['code']);
+                $response = VippsLogin::getInstance()->vippsLogin->getNewContinueToken($get['code'], $get['state']);
                 $res_obj = \GuzzleHttp\json_decode($response->getBody()->getContents());
 
                 if(is_object($res_obj) && isset($res_obj->access_token))
@@ -200,8 +215,10 @@ class VippsController extends Controller
                 {
                     Craft::$app->session->setFlash('danger', Craft::t('vipps-login', 'Login Failed: Invalid response from Vipps'));
                 }
+            } catch (ClientException $e) {
+                Craft::$app->session->setFlash('danger', Craft::t('vipps-login', 'Login Failed: ' . $e->getResponse()->getBody()->getContents()));
             } catch (\Exception $e) {
-                Craft::$app->session->setFlash('danger', Craft::t('vipps-login', 'Login Failed:' . $e->getMessage()));
+                Craft::$app->session->setFlash('danger', Craft::t('vipps-login', 'Login Failed: ' . $e->getMessage()));
             }
         }
         return false;
@@ -222,7 +239,7 @@ class VippsController extends Controller
         {
             try {
                 /* @var $response \Psr\Http\Message\ResponseInterface */
-                $response = VippsLogin::getInstance()->vippsLogin->getNewLoginToken($get['code']);
+                $response = VippsLogin::getInstance()->vippsLogin->getNewLoginToken($get['code'], $get['state']);
                 $res_obj = \GuzzleHttp\json_decode($response->getBody()->getContents());
 
                 if(is_object($res_obj) && isset($res_obj->access_token))
@@ -235,6 +252,8 @@ class VippsController extends Controller
                 {
                     Craft::$app->session->setFlash('danger', Craft::t('vipps-login', 'Login Failed: Invalid response from Vipps'));
                 }
+            } catch (ClientException $e) {
+                Craft::$app->session->setFlash('danger', Craft::t('vipps-login', 'Login Failed: ' . $e->getResponse()->getBody()->getContents()));
             } catch (\Exception $e) {
                 Craft::$app->session->setFlash('danger', Craft::t('vipps-login', 'Login Failed:' . $e->getMessage()));
             }
@@ -343,5 +362,23 @@ class VippsController extends Controller
         Craft::$app->getElements()->saveElement($user, false);
 
         return $user;
+    }
+
+    private function getReturnUrl()
+    {
+        $r = \Craft::$app->request->get('r');
+        if(is_string($r) && strlen($r) > 0)
+        {
+            $url = StringHelper::base64UrlDecode($r);
+            return $url;
+        }
+        return false;
+    }
+
+    public function return($state)
+    {
+        $state = unserialize(base64_decode($state));
+        if($state && isset($state->returnUrl)) return $this->redirect($state->returnUrl);
+        return $this->goBack();
     }
 }

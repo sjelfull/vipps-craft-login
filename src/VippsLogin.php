@@ -137,6 +137,9 @@ class VippsLogin extends Plugin
                 $event->rules['vipps/login/continue'] = 'vipps-login/vipps/continue';
                 $event->rules['vipps/login/forget'] = 'vipps-login/vipps/forget';
                 $event->rules['vipps/login/verify'] = 'vipps-login/vipps/verify';
+                $event->rules['vipps/redirect/login'] = 'vipps-login/redirect/login';
+                $event->rules['vipps/redirect/continue'] = 'vipps-login/redirect/continue';
+                $event->rules['vipps/logout'] = 'vipps-login/vipps/logout';
             }
         );
     }

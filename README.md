@@ -70,8 +70,9 @@ The button can be modified by adding functions between `loginButton` and `render
 | `small` | Small size, 210px | `craft.vippsLogin.loginButton.small.render()` |
 | `large` | Large Size, 250px (Default) | `craft.vippsLogin.loginButton.large.render()` |
 | `continue` | Change the login button to Continue | `craft.vippsLogin.loginButton.continue.render()`|
-| `login` | Change the continue button to Login | `craft.vippsLogin.continueButton.login.render()` |
-| `register` | Change the button to Register | `craft.vippsLogin.continueButton.register.render()` |
+| `login` | Change the continue button to Login | `craft.vippsLogin.continueButton.login.render()` |`
+| `register` | Change the button to Register | `craft.vippsLogin.continueButton.register.render()` |`
+| `returnUrl` | Manage the redirect URL | `craft.vippsLogin.returnUrl('https://vipps.no?query=s#div').render()` |`
 
 These functions can be combined;
 ```
@@ -93,11 +94,16 @@ Append to both:
 {{ craft.vippsLogin.loginButton.render('rel="external"', 'title="Login with Vipps" class="btn"') | raw }}
 ```
 
+#### ReturnURL
+You can add a return url using the `returnUrl()` function, or you can manually add `?r=BASE64URL(yoururl)` to the end of the button link should you need to dynamically update with javascript.
+
 ## Rendering your own button
-You can also call the function `craft.vippsLogin.getLoginUrl()` or `craft.vippsLogin.getContinueUrl()` to just get the URL.
+You can also call the function `craft.vippsLogin.getLoginUrl()`, `craft.vippsLogin.getContinueUrl()` or `craft.vippsLogin.getLogoutUrl()` to just get the URL.
 ```
 <a href="{{ craft.vippsLogin.getLoginUrl() }}">Log in with Vipps</a>
 <a href="{{ craft.vippsLogin.getContinueUrl() }}">Continue with Vipps</a>
+<a href="{{ craft.vippsLogin.getLogoutUrl() }}">Log out</a>
+<a href="{{ craft.vippsLogin.getLogoutUrl(string optional_return_url) }}">Log out</a>
 ```
 
 ## Getting user information from Vipps
@@ -141,10 +147,21 @@ To show these messages in your template you need to look at the [documentation](
 {% endfor %}
 ```
 
+
 | Type | Description | Message |
 | --- | --- | --- |
 | `danger` | Login failed in Vipps | `error_description` from Vipps API |
 | `danger` | Login failed in Vipps without message | 'Something went wrong while logging you in. Please try again, if the error persists contact the site administrator.' |
+
+## Using the "Automatic Return" flow option
+
+Before using this option, please read about the function and its security implications in the official [documentation](https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#automatic-return-from-vipps-app).
+
+> This flow is designed for web-pages that would like to have the user automatically returned to a browser after completing the confirmation in the Vipps app. Note that there are security implications by using this flow. It is not suited for every scenario. Merchants must make their own considerations to ensure that it is only used where suitable.
+> 
+> Due to how the different mobile operating systems handle app-switch to browser, the user can be returned to a different browser than the one he/she started in. On iOS the user can e.g. start the login in Chrome and be returned to Safari after confirming in the Vipps app. This means that the merchant site cannot rely on cookies beeing present in the browser the user is returned to.
+> 
+> By using this flow Vipps login will be able to complete the login process even if the user ends up in a different browser. However, the merchant must ensure that logins can complete, even without session information like cookies.
 
 ## Changing the Password Verification template
 When a user register/login with Vipps and an email that exists, they will be asked to confirm the password and the accounts will be linked.

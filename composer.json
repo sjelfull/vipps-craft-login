@@ -1,7 +1,7 @@
 {
   "name": "vippsas/vipps-craft-login",
   "description": "Vipps Login Integration for CraftCMS",
-  "version": "1.0.1-beta.2",
+  "version": "1.0.1",
   "type": "craft-plugin",
   "keywords": ["vipps", "login", "authentication", "craft", "craftcms"],
   "license": "MIT",

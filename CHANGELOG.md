@@ -1,5 +1,10 @@
 # Release Notes for Vipps Login for Craft
 
+## 1.0.2 - 2021-10-12
+
+### Updated
+- Updated README.md
+
 ## 1.0.1 - 2020-12-11
 
 ### Added

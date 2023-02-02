@@ -1,7 +1,7 @@
 {
   "name": "vippsas/vipps-craft-login",
   "description": "Vipps Login Integration for CraftCMS",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "type": "craft-plugin",
   "keywords": ["vipps", "login", "authentication", "craft", "craftcms"],
   "license": "MIT",
@@ -18,8 +18,8 @@
     "docs": "https://github.com/vippsas/vipps-craft-login/blob/master/README.md"
   },
   "require": {
-    "craftcms/cms": "^3.1.0",
-    "guzzlehttp/guzzle": ">=6.3.0 <6.5.0 || ^6.5.1",
+    "craftcms/cms": "^4.0",
+    "guzzlehttp/guzzle": "^7.2.0",
     "ext-json": "*"
   },
   "autoload": {

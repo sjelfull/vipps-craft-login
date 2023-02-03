@@ -1,4 +1,8 @@
 # Release Notes for Vipps Login for Craft
+## 2.0.0 - 2023-02-02
+
+### Added
+- Support for Craft 4
 
 ## 1.0.2 - 2021-10-12
 

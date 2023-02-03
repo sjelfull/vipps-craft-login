@@ -8,9 +8,9 @@ use craft\base\Model;
 
 class ConfirmPasswordForm extends Model
 {
-    public $password;
+    public string $password;
 
-    public function rules()
+    public function rules(): array
     {
         return [
             ['password', 'string']

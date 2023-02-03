@@ -11,11 +11,6 @@ use yii\web\NotFoundHttpException;
 
 class SettingsController extends Controller
 {
-    /**
-     * Plugin settings
-     *
-     * @return Response The rendered result
-     */
     public function actionIndex() : Response
     {
         $plugin = VippsLogin::getInstance();
@@ -30,14 +25,6 @@ class SettingsController extends Controller
         return $this->renderTemplate('vipps-login/settings/settings', $variables);
     }
 
-    /**
-     * Saves a plugin’s settings.
-     *
-     * @return Response|null
-     * @throws NotFoundHttpException if the requested plugin cannot be found
-     * @throws \yii\web\BadRequestHttpException
-     * @throws \craft\errors\MissingComponentException
-     */
     public function actionSavePluginSettings() : Response
     {
         $this->requirePostRequest();

@@ -67,7 +67,7 @@ class VippsLogin extends Plugin
      *
      * @var bool
      */
-    public $hasCpSettings = true;
+    public bool $hasCpSettings = true;
 
     // Public Methods
     // =========================================================================
@@ -102,9 +102,9 @@ class VippsLogin extends Plugin
     /**
      * @inheritdoc
      */
-    public function getSettingsResponse()
+    public function getSettingsResponse(): mixed
     {
-        Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('vipps-login/settings'));
+        return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('vipps-login/settings'));
     }
 
     // Protected Methods

@@ -59,66 +59,27 @@ class Button
     // Properties
     // =========================================================================
 
-    /**
-     * Button size
-     * @var int
-     */
-    private $size = self::SIZE_LARGE;
-
-    /**
-     * Button shape
-     * @var string
-     */
-    private $shape = self::SHAPE_RECTANGLE;
-
-    /**
-     * Button language
-     * @var string
-     */
-    private $lang;
-
-    /**
-     * Button href
-     * @var string
-     */
-    private $href;
-
-    /**
-     * Button type
-     * @var string
-     */
-    private $type = self::TYPE_LOGIN;
-
-    /**
-     * Optional return url
-     * @var string
-     */
-    private $return_url;
+    private int $size = self::SIZE_LARGE;
+    private string $shape = self::SHAPE_RECTANGLE;
+    private string $lang;
+    private string $href;
+    private string $type = self::TYPE_LOGIN;
+    private string $return_url;
 
     // Public Methods
     // =========================================================================
 
-    /**
-     * LogInButton constructor.
-     * @param string $href
-     */
     public function __construct()
     {
         $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/login';
     }
 
-    /**
-     * Render the button
-     * @param string|null $a
-     * @param string|null $img
-     * @return string
-     */
     public function render(string $a = null, string $img = null) : string
     {
-        \Craft::$app->user->setReturnUrl(Craft::$app->request->getUrl());
+        Craft::$app->user->setReturnUrl(Craft::$app->request->getUrl());
 
         // If the button language is not given, try to set the language based on the site language
-        if($this->lang == null)
+        if(!isset($this->lang))
         {
             if(in_array(Craft::$app->sites->currentSite->language, ['nb', 'nn', 'nb-NO', 'nn-NO'])) $this->lang = self::LANG_NORWEGIAN;
             else $this->lang = self::LANG_ENGLISH;
@@ -129,135 +90,83 @@ class Button
         else $a = ' ' . $a;
         if ($img == null) $img = '';
         else $img = ' ' . $img;
-        if($this->return_url) $href = $this->href . '?r=' . $this->return_url;
+        if(isset($this->return_url)) $href = $this->href . '?r=' . $this->return_url;
         else $href = $this->href;
         return "<a href=\"{$href}\"{$a}><img src=\"/vipps/asset/button/{$filename}\"{$img}></a>";
     }
 
-    /**
-     * Make the button "Log in with vipps"
-     * @return $this
-     */
-    public function login()
+    public function login(): self
     {
         $this->type = self::TYPE_LOGIN;
         $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/login';
         return $this;
     }
 
-    /**
-     * Make the button "Continue with vipps"
-     * @return $this
-     */
-    public function continue()
+    public function continue(): self
     {
         $this->type = self::TYPE_CONTINUE;
         $this->href = Craft::$app->request->getHostInfo().'/vipps/redirect/continue';
         return $this;
     }
 
-    /**
-     * Make the button "Register with vipps"
-     * @return $this
-     */
-    public function register()
+    public function register(): self
     {
         $this->type = self::TYPE_REGISTER;
         return $this;
     }
 
-    /**
-     * Make the button large
-     * @return $this
-     */
-    public function large()
+    public function large(): self
     {
         $this->size = self::SIZE_LARGE;
         return $this;
     }
 
-    /**
-     * Make the button large
-     * @return $this
-     */
-    public function small()
+    public function small(): self
     {
         $this->size = self::SIZE_SMALL;
         return $this;
     }
 
-    /**
-     * Make the button text english
-     * @return $this
-     */
-    public function en()
+    public function en(): self
     {
         $this->lang = self::LANG_ENGLISH;
         return $this;
     }
 
-    /**
-     * Make the button text norwegian
-     * @return $this
-     */
-    public function no()
+    public function no(): self
     {
         $this->lang = self::LANG_NORWEGIAN;
         return $this;
     }
 
-    /**
-     * Make the button text english
-     * @return $this
-     */
-    public function english()
+    public function english(): self
     {
         return $this->en();
     }
 
-    /**
-     * Make the button text norwegian
-     * @return $this
-     */
-    public function norwegian()
+    public function norwegian(): self
     {
         return $this->no();
     }
 
-    /**
-     * Make the button rectangle shaped
-     * @return $this
-     */
-    public function rect()
+    public function rect(): self
     {
         $this->shape = self::SHAPE_RECTANGLE;
         return $this;
     }
 
-    /**
-     * Make the button rectangle shaped
-     * @return $this
-     */
-    public function rectangle()
+    public function rectangle(): self
     {
         return $this->rect();
     }
 
-    /**
-     * Make the button pill shaped
-     * @return $this
-     */
-    public function pill()
+    public function pill(): self
     {
         $this->shape = self::SHAPE_PILL;
         return $this;
     }
 
-    /**
-     * @param $url
-     * @return $this
-     */
-    public function returnUrl($url)
+    public function returnUrl($url): self
     {
         $this->return_url = StringHelper::base64UrlEncode($url);
         return $this;

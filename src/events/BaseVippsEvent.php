@@ -10,48 +10,27 @@ use yii\base\Event;
 
 class BaseVippsEvent extends Event
 {
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
+    private Session $session;
 
-    /**
-     * @var Session
-     */
-    private $session;
-
-    /**
-     * @param User $user
-     * @return self
-     */
     public function setUser(User $user) : self
     {
         $this->user = $user;
         return $this;
     }
 
-    /**
-     * @param User $user
-     * @return self
-     */
     public function setSession(Session $session) : self
     {
         $this->session = $session;
         return $this;
     }
 
-    /**
-     * @return User
-     */
-    public function getUser()
+    public function getUser(): User
     {
         return $this->user;
     }
 
-    /**
-     * @return Session
-     */
-    public function getSession()
+    public function getSession(): Session
     {
         return $this->session;
     }

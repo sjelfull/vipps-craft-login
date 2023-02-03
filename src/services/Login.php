@@ -4,7 +4,10 @@
 namespace vippsas\login\services;
 
 use Craft;
+use stdClass;
+use craft\base\Model;
 use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 use vippsas\login\components\Button;
 use vippsas\login\exceptions\RequestTimeoutException;
 use vippsas\login\models\Session;
@@ -21,13 +24,11 @@ class Login extends Component
 
     /**
      * Base URL for the production API
-     * @var string
      */
     const PROD_URL = 'https://api.vipps.no';
 
     /**
      * Base URL for the test API
-     * @var string
      */
     const TEST_URL = 'https://apitest.vipps.no';
 
@@ -36,28 +37,21 @@ class Login extends Component
 
     /**
      * Settings object
-     * @var Settings
      */
-    private $settings;
+    private ?Model $settings;
 
     /**
      * Guzzle Client object
-     * @var Client
      */
-    private $client;
+    private Client $client;
 
     /**
      * The Vipps Session if the User is logged in
-     * @var Session
      */
-    private $session_object;
+    private Session $session_object;
 
     // Public Methods
     // =========================================================================
-
-    /**
-     * @inheritDoc
-     */
     public function init()
     {
         $this->settings = VippsLogin::getInstance()->getSettings();
@@ -65,35 +59,16 @@ class Login extends Component
         parent::init();
     }
 
-    /**
-     * Get the LogInButton object
-     * @return Button
-     * @throws InvalidConfigException
-     * @throws \yii\base\Exception
-     */
     public function loginButton() : Button
     {
         return (new Button())->login();
     }
 
-    /**
-     * Get the LogInButton object
-     * @return Button
-     * @throws InvalidConfigException
-     * @throws \yii\base\Exception
-     */
     public function continueButton() : Button
     {
         return (new Button())->continue();
     }
 
-    /**
-     * Returns the auth URL
-     * @param string
-     * @return string
-     * @throws InvalidConfigException
-     * @throws \yii\base\Exception
-     */
     public function getLoginUrl($returnUrl) : string
     {
         $state = $this->createState($returnUrl);
@@ -117,13 +92,6 @@ class Login extends Component
         return $path.'?'.http_build_query($parameters);
     }
 
-    /**
-     * Returns the auth URL
-     * @param string
-     * @return string
-     * @throws InvalidConfigException
-     * @throws \yii\base\Exception
-     */
     public function getContinueUrl($returnUrl) : string
     {
         $state = $this->createState($returnUrl);
@@ -154,14 +122,7 @@ class Login extends Component
         return $url;
     }
 
-    /**
-     * Request a new login token from vipps based on a code
-     * @param $code
-     * @param $packed_state
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws InvalidConfigException
-     */
-    public function getNewLoginToken($code, $packed_state)
+    public function getNewLoginToken($code, $packed_state): ResponseInterface
     {
         $path = $this->getOpenIDConfiguration('token_endpoint', $this->getBaseUrl().'/access-management-1.0/access/oauth2/token');
 
@@ -189,14 +150,7 @@ class Login extends Component
         return $this->getClient()->post($path, $body);
     }
 
-    /**
-     * Request a new continue token from vipps based on a code
-     * @param $code
-     * @param $packed_state
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws InvalidConfigException
-     */
-    public function getNewContinueToken($code, $packed_state)
+    public function getNewContinueToken($code, $packed_state): ResponseInterface
     {
         $path = $this->getOpenIDConfiguration('token_endpoint', $this->getBaseUrl().'/access-management-1.0/access/oauth2/token');
 
@@ -223,13 +177,7 @@ class Login extends Component
         return $this->getClient()->post($path, $body);
     }
 
-    /**
-     * Request userinfo from Vipps
-     * @param $token
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws InvalidConfigException
-     */
-    public function getUserInfo($token)
+    public function getUserInfo($token): ResponseInterface
     {
         $path = $this->getOpenIDConfiguration('userinfo_endpoint', $this->getBaseUrl().'/vipps-userinfo-api/userinfo');
 
@@ -240,12 +188,7 @@ class Login extends Component
         ]);
     }
 
-    /**
-     * Returns the Vipps Session if the user is logged in.
-     * Returns null if there is no session for the current user.
-     * @return Session|null
-     */
-    public function session()
+    public function session(): ?Session
     {
         if(!$this->session_object)
         {
@@ -271,15 +214,7 @@ class Login extends Component
     // Protected Methods
     // =========================================================================
 
-    /**
-     * Get the OpenID Configuration from the
-     * .well-known/openid-configuration endpoint
-     * @param string|null $path
-     * @param string|null $default
-     * @return mixed|string
-     * @throws InvalidConfigException
-     */
-    protected function getOpenIDConfiguration(string $path = null, string $default = null)
+    protected function getOpenIDConfiguration(string $path = null, string $default = null): mixed
     {
         $config = Craft::$app->cache->get('vipps-login-openid-configuration');
 
@@ -305,43 +240,27 @@ class Login extends Component
     // Private Methods
     // =========================================================================
 
-    private function fetchOpenIDConfiguration()
+    private function fetchOpenIDConfiguration(): ResponseInterface
     {
         return $this->getClient()->get($this->getBaseUrl().'/access-management-1.0/access/.well-known/openid-configuration');
     }
 
-    /**
-     * Get the base API URL based on environment
-     * @return string
-     */
     private function getBaseUrl() : string
     {
         return $this->settings->inTest() ? self::TEST_URL : self::PROD_URL;
     }
 
-    /**
-     * Returns the Client ID for the current environment
-     * @return string
-     */
     private function getClientId() : string
     {
         return $this->settings->inTest() ? $this->settings->test_client_id : $this->settings->prod_client_id;
     }
 
-    /**
-     * Returns the Client Secret for the current environment
-     * @return string
-     */
     private function getClientSecret() : string
     {
         return $this->settings->inTest() ? $this->settings->test_client_secret : $this->settings->prod_client_secret;
     }
 
-    /**
-     * Get the GuzzleHTTP Client object
-     * @return Client
-     */
-    private function getClient()
+    private function getClient(): Client
     {
         if(!$this->client || $this->client instanceof Client) $this->client = new Client();
         return $this->client;
@@ -352,13 +271,8 @@ class Login extends Component
      * The function returns a sha256 hashed version of the random code.
      *
      * https://tools.ietf.org/html/rfc7636#section-4.1
-     *
-     * @param $state
-     *
-     * @return string
-     * @throws \yii\base\Exception
      */
-    private function generateCodeChallenge($state)
+    private function generateCodeChallenge($state): string
     {
         $code_verifier = \Craft::$app->security->generateRandomString(128);
         Craft::$app->cache->set('vipps_' . $state, $code_verifier, 300);
@@ -366,32 +280,26 @@ class Login extends Component
         return rtrim(StringHelper::base64UrlEncode(hash('sha256', utf8_encode($code_verifier), true)),'=');
     }
 
-    private function createState($returnUrl)
+    private function createState($returnUrl): stdClass
     {
-        $state = new \stdClass();
-        $state->key = \Craft::$app->security->generateRandomString(50);
+        $state = new stdClass();
+        $state->key = Craft::$app->security->generateRandomString(50);
         $state->returnUrl = $returnUrl;
 
         return $state;
     }
 
-    private function packState($state)
+    private function packState($state): string
     {
         return base64_encode(serialize($state));
     }
 
-    private function unpackState($packed_state)
+    private function unpackState($packed_state): stdClass
     {
-
         return unserialize(base64_decode($packed_state));
     }
-
-    /**
-     * Retrieves a code from cache based on a state.
-     * @param $state
-     * @return mixed
-     */
-    private function retrieveCodeVerifier($state)
+    
+    private function retrieveCodeVerifier($state): mixed
     {
         return Craft::$app->cache->get('vipps_' . $state);
     }

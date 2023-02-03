@@ -11,145 +11,120 @@ class Settings extends Model
 
     /**
      * Use Vipps Testing Environment
-     * @var string
      */
-    public $test = true;
+    public bool $test = true;
 
     /**
      * Vipps Test Client ID
-     * @var string
      */
-    public $test_client_id;
+    public string $test_client_id;
 
     /**
      * Vipps Test Client Secret
-     * @var string
      */
-    public $test_client_secret;
+    public string $test_client_secret;
 
     /**
      * Vipps Test Subscription Key
-     * @var string
      */
-    public $test_subscription_key;
+    public string $test_subscription_key;
 
     /**
      * Vipps Production Client ID
-     * @var string
      */
-    public $prod_client_id;
+    public string $prod_client_id;
 
     /**
      * Vipps Production Client Secret
-     * @var string
      */
-    public $prod_client_secret;
+    public string $prod_client_secret;
 
     /**
      * Vipps Production Subscription Key
-     * @var string
      */
-    public $prod_subscription_key;
+    public string $prod_subscription_key;
 
     /**
      * Automatic return after login
      * https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#automatic-return-from-vipps-app
-     * @var boolean
      */
-    public $login_automatic_return = false;
+    public bool $login_automatic_return = false;
 
     /**
      * Request address
-     * @var boolean
      */
-    public $login_address = false;
+    public bool $login_address = false;
 
     /**
      * Request birthDate
-     * @var boolean
      */
-    public $login_birthDate = false;
+    public bool $login_birthDate = false;
 
     /**
      * Request email
-     * @var boolean
      */
-    public $login_email = true;
+    public bool $login_email = true;
 
     /**
      * Request name
-     * @var boolean
      */
-    public $login_name = true;
+    public bool $login_name = true;
 
     /**
      * Request phoneNumber
-     * @var boolean
      */
-    public $login_phoneNumber = true;
+    public bool $login_phoneNumber = true;
 
     /**
      * Request nin (Norwegian National Identification Number)
-     * @var boolean
      */
-    public $login_nin = false;
+    public bool $login_nin = false;
 
     /**
      * Automatic return after continue
      * https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#automatic-return-from-vipps-app
-     * @var boolean
      */
-    public $continue_automatic_return = false;
+    public bool $continue_automatic_return = false;
 
     /**
      * Request address
-     * @var boolean
      */
-    public $continue_address = false;
+    public bool $continue_address = false;
 
     /**
      * Request birthDate
-     * @var boolean
      */
-    public $continue_birthDate = false;
+    public bool $continue_birthDate = false;
 
     /**
      * Request email
-     * @var boolean
      */
-    public $continue_email = true;
+    public bool $continue_email = true;
 
     /**
      * Request name
-     * @var boolean
      */
-    public $continue_name = true;
+    public bool $continue_name = true;
 
     /**
      * Request phoneNumber
-     * @var boolean
      */
-    public $continue_phoneNumber = true;
+    public bool $continue_phoneNumber = true;
 
     /**
      * Request nin (Norwegian National Identification Number)
-     * @var boolean
      */
-    public $continue_nin = false;
+    public bool $continue_nin = false;
 
     /**
      * Custom verification template path
-     * @var string
      */
-    public $verify_template = '';
+    public string $verify_template = '';
 
     // Public Methods
     // =========================================================================
 
-    /**
-     * @inheritDoc
-     */
-    public function scenarios()
+    public function scenarios(): array
     {
         return [
             'testMode' => [
@@ -165,10 +140,7 @@ class Settings extends Model
         ];
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['test', 'login_automatic_return', 'continue_automatic_return'], 'boolean', 'trueValue' => true, 'falseValue' => false],
@@ -180,10 +152,7 @@ class Settings extends Model
         ];
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function beforeValidate()
+    public function beforeValidate(): bool
     {
         if($this->test == 1) $this->scenario = 'testMode';
         else $this->scenario = 'productionMode';
@@ -191,10 +160,7 @@ class Settings extends Model
         return parent::beforeValidate();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'test' => 'Test mode',
@@ -222,46 +188,26 @@ class Settings extends Model
         ];
     }
 
-    /**
-     * Is the integration in production mode?
-     * @return bool
-     */
     public function inProduction() : bool
     {
         return !$this->inTest();
     }
 
-    /**
-     * Is the integration in production mode?
-     * @return bool
-     */
     public function inTest() : bool
     {
         return $this->test == 1;
     }
 
-    /**
-     * Is the login flow using automatic return?
-     * @return bool
-     */
     public function loginAutomaticReturn() : bool
     {
         return $this->login_automatic_return == 1;
     }
 
-    /**
-     * Is the continue flow using automatic return?
-     * @return bool
-     */
     public function continueAutomaticReturn() : bool
     {
         return $this->continue_automatic_return == 1;
     }
 
-    /**
-     * Returns the scopes
-     * @return array
-     */
     public function getLoginScopes() : array
     {
         $scopes = ['openid', 'api_version_2'];
@@ -273,10 +219,7 @@ class Settings extends Model
         if($this->login_nin == 1) $scopes[] = 'nin';
         return $scopes;
     }
-    /**
-     * Returns the scopes
-     * @return array
-     */
+
     public function getContinueScopes() : array
     {
         $scopes = ['openid', 'api_version_2'];
@@ -289,12 +232,6 @@ class Settings extends Model
         return $scopes;
     }
 
-    /**
-     * Returns the redirect URI for the user when returned from Vipps
-     *
-     * @param string $action
-     * @return string
-     */
     public function getRedirectUri(string $action = 'login') : string
     {
         if($action == 'login') return \Craft::$app->request->getHostInfo().'/vipps/login';

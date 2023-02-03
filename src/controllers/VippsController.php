@@ -20,31 +20,17 @@ use vippsas\login\records\User as VippsUser;
 use yii\web\Response;
 use vippsas\login\VippsLogin;
 use craft\helpers\StringHelper;
-//use craft\commerce\records\Country;
 
 class VippsController extends Controller
 {
-    /**
-     * Allow guest users to access these actions
-     * @var array
-     */
-    protected $allowAnonymous = [
+    protected array|int|bool $allowAnonymous = [
         'login',
         'continue',
         'forget',
         'verify'
     ];
 
-    /**
-     * Catches the user when returned from Vipps
-     * with the Continue option
-     * @return Response
-     * @throws CreateUserException
-     * @throws \Throwable
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\Exception
-     */
-    public function actionLogin()
+    public function actionLogin(): Response
     {
         $get = Craft::$app->request->get();
 
@@ -91,13 +77,7 @@ class VippsController extends Controller
         return $this->return($get['state']);
     }
 
-    /**
-     * Catches the user when returned from Vipps
-     * with the Continue option
-     *
-     * @return Response
-     */
-    public function actionContinue()
+    public function actionContinue(): Response
     {
         $get = Craft::$app->request->get();
 
@@ -106,13 +86,7 @@ class VippsController extends Controller
         return $this->return($get['state']);
     }
 
-    /**
-     * Verify users password to connect an existing
-     * user to the vipps account
-     *
-     * @return Response
-     */
-    public function actionVerify()
+    public function actionVerify(): Response
     {
         $session = unserialize(Craft::$app->session->get('vipps_login'));
         if(!$session)
@@ -154,23 +128,13 @@ class VippsController extends Controller
         return $this->renderTemplate('vipps-login/verify', ['form' => $form]);
     }
 
-    /**
-     * Forgets the users Vipps-session from the PHP session
-     *
-     * @return Response
-     */
-    public function actionForget()
+    public function actionForget(): Response
     {
         Craft::$app->session->remove('vipps_login');
         return $this->goBack();
     }
 
-    /**
-     * Logs out the user and forgets the users Vipps-session
-     *
-     * @return Response
-     */
-    public function actionLogout()
+    public function actionLogout(): Response
     {
         Craft::$app->session->remove('vipps_login');
         Craft::$app->user->logout();
@@ -179,11 +143,7 @@ class VippsController extends Controller
         return $this->goBack();
     }
 
-    /**
-     * @param $get
-     * @return bool|Session
-     */
-    private function setSessionFromContinueResponse($get)
+    private function setSessionFromContinueResponse(array $get): bool|Session
     {
         if(isset($get['error']))
         {
@@ -224,11 +184,7 @@ class VippsController extends Controller
         return false;
     }
 
-    /**
-     * @param $get
-     * @return bool|Session
-     */
-    private function setSessionFromLoginResponse($get)
+    private function setSessionFromLoginResponse(array $get): bool|Session
     {
         if(isset($get['error']))
         {
@@ -240,7 +196,7 @@ class VippsController extends Controller
             try {
                 /* @var $response \Psr\Http\Message\ResponseInterface */
                 $response = VippsLogin::getInstance()->vippsLogin->getNewLoginToken($get['code'], $get['state']);
-                $res_obj = \GuzzleHttp\json_decode($response->getBody()->getContents());
+                $res_obj = json_decode($response->getBody()->getContents());
 
                 if(is_object($res_obj) && isset($res_obj->access_token))
                 {
@@ -261,14 +217,7 @@ class VippsController extends Controller
         return false;
     }
 
-    /**
-     * @param Session $session
-     * @return bool
-     * @throws \Throwable
-     * @throws \craft\errors\ElementNotFoundException
-     * @throws \yii\base\Exception
-     */
-    private function createUser(Session $session)
+    private function createUser(Session $session): bool
     {
         $user = new User();
 
@@ -319,7 +268,7 @@ class VippsController extends Controller
         Craft::$app->getUser()->login($user, $generalConfig->userSessionDuration);
     }
 
-    private function connect(User $user, Session $session)
+    private function connect(User $user, Session $session): bool
     {
         $vippsUser = new VippsUser();
         $vippsUser->user_id = $user->id;
@@ -327,55 +276,25 @@ class VippsController extends Controller
         return $vippsUser->save();
     }
 
-    private function update(User $user, Session $session)
+    private function update(User $user, Session $session): User
     {
         $user->firstName = $session->getGivenName();
         $user->lastName = $session->getFamilyName();
-
-        // Beginning of Commerce Address Implementation
-        /*
-        if(Craft::$app->plugins->getPlugin('commerce', false))
-        {
-            $addresses = $session->getAddresses();
-            if(is_array($addresses))
-            {
-                foreach ($addresses as $address)
-                {
-                    if(\craft\commerce\records\Address::findOne(['']))
-                    $addr = new \craft\commerce\records\Address();
-
-                    $country = Country::findOne(['iso' => $address->country]);
-                    $addr->label = $address->address_type ?? null;
-                    $addr->firstName = $session->getGivenName();
-                    $addr->lastName = $session->getFamilyName();
-                    $addr->countryId = $country ? $country->id : null;
-                    $addr->address1 = $address->street_address ?? null;
-                    $addr->zipCode = $address->postal_code ?? null;
-                    $addr->city = $address->region ?? null;
-                    $addr->save();
-                }
-                die(var_dump($address));
-            }
-        }
-        */
 
         Craft::$app->getElements()->saveElement($user, false);
 
         return $user;
     }
 
-    private function getReturnUrl()
+    private function getReturnUrl(): string|bool
     {
-        $r = \Craft::$app->request->get('r');
-        if(is_string($r) && strlen($r) > 0)
-        {
-            $url = StringHelper::base64UrlDecode($r);
-            return $url;
-        }
+        $r = Craft::$app->request->get('r');
+        if(is_string($r) && strlen($r) > 0) return StringHelper::base64UrlDecode($r);
+
         return false;
     }
 
-    public function return($state)
+    public function return($state): Response
     {
         $state = unserialize(base64_decode($state));
         if($state && isset($state->returnUrl)) return $this->redirect($state->returnUrl);

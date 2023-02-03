@@ -3,56 +3,26 @@
 
 namespace vippsas\login\models;
 
+use DateTime;
+use Exception;
 use vippsas\login\VippsLogin;
 
 class Session
 {
     // Properties
     // =========================================================================
-
-    /**
-     * @var string
-     */
-    private $access_token;
-
-    /**
-     * @var integer
-     */
-    private $token_duration;
-
-    /**
-     * @var string
-     */
-    private $id_token;
-
-    /**
-     * @var array
-     */
-    private $scopes;
-
-    /**
-     * @var string
-     */
-    private $token_type;
-
-    /**
-     * @var integer
-     */
-    private $expires_at;
-
-    /**
-     * @var array
-     */
-    private $data;
+    private string $access_token;
+    private int $token_duration;
+    private string $id_token;
+    private array $scopes;
+    private string $token_type;
+    private int $expires_at;
+    private array $data;
 
     // Public Methods
     // =========================================================================
 
-    /**
-     * Session constructor.
-     * @param mixed $response
-     */
-    public function __construct($response)
+    public function __construct(mixed $response)
     {
         $this->access_token = $response->access_token;
         $this->token_duration = $response->expires_in;
@@ -63,134 +33,71 @@ class Session
         $this->getDataFromVipps();
     }
 
-    /**
-     * Check if the token is expired
-     * @return bool
-     */
-    public function isExpired()
+    public function isExpired(): bool
     {
         return $this->getExpiresIn() > 0;
     }
 
-    /**
-     * Returns the number of seconds until
-     * the token expires
-     * @return int
-     */
-    public function getExpiresIn()
+    public function getExpiresIn(): int
     {
         return $this->expires_at - time();
     }
 
-    /**
-     * Returns an array of adresses
-     * @return array|null
-     */
-    public function getAddresses()
+    public function getAddresses(): array|null
     {
         return $this->getFieldFromData('address');
     }
 
-    /**
-     * Returns the user email
-     * @return string|null
-     */
-    public function getEmail()
+    public function getEmail(): string|null
     {
         return $this->getFieldFromData('email');
     }
 
-    /**
-     * Returns true if the email is verified
-     * false if its not, and null if the information is missing
-     * @return bool|null
-     */
-    public function isEmailVerified()
+    public function isEmailVerified(): bool|null
     {
         return $this->getFieldFromData('email_verified');
     }
 
-    /**
-     * Returns the given name
-     * @return string|null
-     */
-    public function getGivenName()
+    public function getGivenName(): string|null
     {
         return $this->getFieldFromData('given_name');
     }
 
-    /**
-     * Returns the family name
-     * @return string|null
-     */
-    public function getFamilyName()
+    public function getFamilyName(): string|null
     {
         return $this->getFieldFromData('family_name');
     }
 
-    /**
-     * Returns the full name
-     * @return string|null
-     */
-    public function getName()
+    public function getName(): string|null
     {
         return $this->getFieldFromData('name');
     }
 
-    /**
-     * Returns the Phone Number
-     * @return string|null
-     */
-    public function getPhoneNumber()
+    public function getPhoneNumber(): string|null
     {
         return $this->getFieldFromData('phone_number');
     }
 
-    /**
-     * Returns the SID
-     * @return string|null
-     */
-    public function getSid()
+    public function getSid(): string|null
     {
         return $this->getFieldFromData('sid');
     }
 
-    /**
-     * Returns the Sub
-     * @return string|null
-     */
-    public function getSub()
+    public function getSub(): string|null
     {
         return $this->getFieldFromData('sub');
     }
 
-    /**
-     * Get the National Identification Number
-     * @return string|null
-     */
-    public function getNin()
+    public function getNin(): string|null
     {
         return $this->getFieldFromData('nin');
     }
 
-    /**
-     * Returns the BirthDate as a DateTime object
-     * @return \DateTime|null
-     */
-    public function getBirthdate()
+    public function getBirthdate(): DateTime|null
     {
         $birthdate = $this->getFieldFromData('birthdate');
-        if($birthdate) return \DateTime::createFromFormat('Y-m-d', $this->getFieldFromData('birthdate'));
+        if($birthdate) return DateTime::createFromFormat('Y-m-d', $this->getFieldFromData('birthdate'));
         return $birthdate;
-    }
-
-    /**
-     * @deprecated Just a test function
-     * @return array
-     */
-    public function getData()
-    {
-        return $this->data;
     }
 
     // Protected Methods
@@ -201,32 +108,17 @@ class Session
     // Private Methods
     // =========================================================================
 
-    /**
-     * Update object with data from Vipps
-     * @return bool
-     */
-    private function getDataFromVipps() : bool
+    private function getDataFromVipps() : void
     {
         if(!$this->data)
         {
-            try {
-                /** @var $response \Psr\Http\Message\ResponseInterface */
-                $response = VippsLogin::getInstance()->vippsLogin->getUserInfo($this->access_token);
-                $this->data = json_decode($response->getBody()->getContents());
-                return true;
-            } catch (\Exception $e) {
-                throw $e;
-                return false;
-            }
+            /** @var $response \Psr\Http\Message\ResponseInterface */
+            $response = VippsLogin::getInstance()->vippsLogin->getUserInfo($this->access_token);
+            $this->data = json_decode($response->getBody()->getContents());
         }
     }
 
-    /**
-     * Retrieve a field from the data object
-     * @param $field
-     * @return mixed|null
-     */
-    private function getFieldFromData($field)
+    private function getFieldFromData($field): mixed
     {
         if(!$this->data) $this->getDataFromVipps();
         if(!isset($this->data->$field)) return null;

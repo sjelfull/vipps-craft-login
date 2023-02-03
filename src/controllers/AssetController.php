@@ -10,14 +10,8 @@ use yii\web\NotFoundHttpException;
 
 class AssetController extends Controller
 {
-    protected $allowAnonymous = ['button'];
+    protected array|int|bool $allowAnonymous = ['button'];
 
-    /**
-     * Return a button SVG
-     * @param string $file
-     * @return Response
-     * @throws NotFoundHttpException
-     */
     public function actionButton(string $file) : Response
     {
         // Strip the filename for all other special characters than -, _ and .

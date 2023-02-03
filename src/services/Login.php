@@ -190,7 +190,7 @@ class Login extends Component
 
     public function session(): ?Session
     {
-        if(!$this->session_object)
+        if(!isset($this->session_object))
         {
             $content = \Craft::$app->session->get('vipps_login');
 
@@ -262,7 +262,7 @@ class Login extends Component
 
     private function getClient(): Client
     {
-        if(!$this->client || $this->client instanceof Client) $this->client = new Client();
+        if(!isset($this->client) || !($this->client instanceof Client)) $this->client = new Client();
         return $this->client;
     }
 

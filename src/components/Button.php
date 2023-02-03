@@ -79,7 +79,7 @@ class Button
         Craft::$app->user->setReturnUrl(Craft::$app->request->getUrl());
 
         // If the button language is not given, try to set the language based on the site language
-        if($this->lang == null)
+        if(!isset($this->lang))
         {
             if(in_array(Craft::$app->sites->currentSite->language, ['nb', 'nn', 'nb-NO', 'nn-NO'])) $this->lang = self::LANG_NORWEGIAN;
             else $this->lang = self::LANG_ENGLISH;
@@ -90,7 +90,7 @@ class Button
         else $a = ' ' . $a;
         if ($img == null) $img = '';
         else $img = ' ' . $img;
-        if($this->return_url) $href = $this->href . '?r=' . $this->return_url;
+        if(isset($this->return_url)) $href = $this->href . '?r=' . $this->return_url;
         else $href = $this->href;
         return "<a href=\"{$href}\"{$a}><img src=\"/vipps/asset/button/{$filename}\"{$img}></a>";
     }

@@ -4,20 +4,17 @@
 namespace vippsas\login\models;
 
 use DateTime;
-use Exception;
+use stdClass;
 use vippsas\login\VippsLogin;
+
 
 class Session
 {
     // Properties
     // =========================================================================
     private string $access_token;
-    private int $token_duration;
-    private string $id_token;
-    private array $scopes;
-    private string $token_type;
     private int $expires_at;
-    private array $data;
+    private stdClass $data;
 
     // Public Methods
     // =========================================================================
@@ -25,10 +22,6 @@ class Session
     public function __construct(mixed $response)
     {
         $this->access_token = $response->access_token;
-        $this->token_duration = $response->expires_in;
-        $this->id_token = $response->id_token;
-        $this->scopes = explode(' ', $response->scope);
-        $this->token_type = $response->token_type;
         $this->expires_at = time()+$response->expires_in;
         $this->getDataFromVipps();
     }
@@ -110,7 +103,7 @@ class Session
 
     private function getDataFromVipps() : void
     {
-        if(!$this->data)
+        if(!isset($this->data))
         {
             /** @var $response \Psr\Http\Message\ResponseInterface */
             $response = VippsLogin::getInstance()->vippsLogin->getUserInfo($this->access_token);
@@ -120,7 +113,7 @@ class Session
 
     private function getFieldFromData($field): mixed
     {
-        if(!$this->data) $this->getDataFromVipps();
+        if(!isset($this->data)) $this->getDataFromVipps();
         if(!isset($this->data->$field)) return null;
         return $this->data->$field;
     }

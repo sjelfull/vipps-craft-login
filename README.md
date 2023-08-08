@@ -231,12 +231,12 @@ Event::on(
 
 ### Example Code
 
-Have a look at the twig template located [here](https://developer.vippsmobilepay.com/vipps-craft-login/blob/master/docs/examples/frontend.twig) for some usage examples. The twig template uses Bulma CSS from a CDN and should work right out of the box if the plugin is installed correctly.
+Have a look at the twig template located [here](https://github.com/elleracompany/vipps-craft-login/blob/master/docs/examples/frontend.twig) for some usage examples. The twig template uses Bulma CSS from a CDN and should work right out of the box if the plugin is installed correctly.
 
 ## How can I get help if I have any issues?
 
 For Craft-related issues you should use the resources and communities available on the [Craft CMS community website](https://craftcms.com/community).
 
-For Plugin-related issues you should create a new issue in the [official repository](https://developer.vippsmobilepay.com/vipps-craft-login/issues).
+For Plugin-related issues you should create a new issue in the [official repository](https://github.com/elleracompany/vipps-craft-login/issues).
 
 For Vipps-related issues, you should contact [Vipps](https://developer.vippsmobilepay.com/).

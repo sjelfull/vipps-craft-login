@@ -46,7 +46,7 @@ class Settings extends Model
 
     /**
      * Automatic return after login
-     * https://developer.vippsmobilepay.com/vipps-login-api/blob/master/vipps-login-api.md#automatic-return-from-vipps-app
+     * https://developer.vippsmobilepay.com/docs/APIs/login-api/api-guide/flows/automatic-return/
      */
     public bool $login_automatic_return = false;
 
@@ -82,7 +82,7 @@ class Settings extends Model
 
     /**
      * Automatic return after continue
-     * https://developer.vippsmobilepay.com/vipps-login-api/blob/master/vipps-login-api.md#automatic-return-from-vipps-app
+     * https://developer.vippsmobilepay.com/docs/APIs/login-api/api-guide/flows/automatic-return/
      */
     public bool $continue_automatic_return = false;
 

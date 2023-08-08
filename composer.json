@@ -13,9 +13,9 @@
   ],
   "support": {
     "email": "support@ellera.no",
-    "issues": "https://github.com/vippsas/vipps-craft-login/issues?state=open",
-    "source": "https://github.com/vippsas/vipps-craft-login",
-    "docs": "https://github.com/vippsas/vipps-craft-login/blob/master/README.md"
+    "issues": "https://developer.vippsmobilepay.com/vipps-craft-login/issues?state=open",
+    "source": "https://developer.vippsmobilepay.com/vipps-craft-login",
+    "docs": "https://developer.vippsmobilepay.com/vipps-craft-login/blob/master/README.md"
   },
   "require": {
     "php": "^8.0",
@@ -31,8 +31,8 @@
   "extra": {
     "name": "Vipps Login",
     "handle": "vipps-login",
-    "documentationUrl": "https://github.com/vippsas/vipps-craft-login/blob/master/README.md",
-    "changelogUrl": "https://github.com/vippsas/vipps-craft-login/blob/master/CHANGELOG.md",
+    "documentationUrl": "https://developer.vippsmobilepay.com/vipps-craft-login/blob/master/README.md",
+    "changelogUrl": "https://developer.vippsmobilepay.com/vipps-craft-login/blob/master/CHANGELOG.md",
     "class": "vippsas\\login\\VippsLogin"
   }
 }

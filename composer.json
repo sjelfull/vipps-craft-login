@@ -31,8 +31,8 @@
   "extra": {
     "name": "Vipps Login",
     "handle": "vipps-login",
-    "documentationUrl": "https://developer.vippsmobilepay.com/docs/APIs/login-api/",
-    "changelogUrl": "https://developer.vippsmobilepay.com/docs/APIs/login-api/CHANGELOG/",
+    "documentationUrl": "https://github.com/elleracompany/vipps-craft-login",
+    "changelogUrl": "https://github.com/elleracompany/vipps-craft-login/blob/master/CHANGELOG.md",
     "class": "vippsas\\login\\VippsLogin"
   }
 }

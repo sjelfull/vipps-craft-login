@@ -6,7 +6,6 @@ This plugin provides *Vipps Login Integration for Craft CMS / CraftCommerce*.
 
 ## Description
 
-This is the official Vipps Login plugin for [Craft CMS](https://craftcms.com). It is owned by [Vipps AS](https://vipps.no) and maintained by [Ellera AS](https://ellera.no).
 This plugin is hosted at <https://github.com/elleracompany/vipps-craft-login>.
 
 With *Vipps Login for Craft CMS* you can:
